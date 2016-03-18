@@ -1,0 +1,4 @@
+pubsub/packages/**
+pubsub/**/bin/**
+pubsub/**/obj/
+*.userprefs

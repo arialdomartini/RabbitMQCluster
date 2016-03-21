@@ -1,5 +1,6 @@
 rabbit1:
-  image: harbur/rabbitmq-cluster
+  #build: clustered-rabbitmq
+  image: clustered-rabbitmq
   hostname: rabbit1
   environment:
     - ERLANG_COOKIE=abcdefg
@@ -8,7 +9,8 @@ rabbit1:
     - "15673:15672"
 
 rabbit2:
-  image: harbur/rabbitmq-cluster
+  #build: clustered-rabbitmq
+  image: clustered-rabbitmq
   hostname: rabbit2
   links:
     - rabbit1
@@ -22,7 +24,8 @@ rabbit2:
     - "15674:15672"
 
 rabbit3:
-  image: harbur/rabbitmq-cluster
+  #build: clustered-rabbitmq
+  image: clustered-rabbitmq
   hostname: rabbit3
   links:
     - rabbit1
@@ -30,10 +33,11 @@ rabbit3:
   environment:
     - ERLANG_COOKIE=abcdefg
     - CLUSTER_WITH=rabbit1
+    - ENABLE_RAM=true
+    - RAM_NODE=true
   ports:
     - "5675:5672"
     - "15675:15672"
-
 
 haproxy:
   image: haproxy

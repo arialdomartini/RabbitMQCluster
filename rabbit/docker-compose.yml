@@ -1,53 +1,54 @@
-rabbit1:
-  #build: clustered-rabbitmq
-  image: clustered-rabbitmq
-  hostname: rabbit1
-  environment:
-    - ERLANG_COOKIE=abcdefg
-  ports:
-    - "5673:5672"
-    - "15673:15672"
+version: '2'
 
-rabbit2:
-  #build: clustered-rabbitmq
-  image: clustered-rabbitmq
-  hostname: rabbit2
-  links:
-    - rabbit1
-  environment:
-    - ERLANG_COOKIE=abcdefg
-    - CLUSTER_WITH=rabbit1
-    - ENABLE_RAM=true
-    - RAM_NODE=true
-  ports:
-    - "5674:5672"
-    - "15674:15672"
+services:
+  rabbit1:
+    #build: clustered-rabbitmq
+    image: clustered-rabbitmq
+    hostname: rabbit1
+    environment:
+      - ERLANG_COOKIE=abcdefg
+    ports:
+      - "5673:5672"
+      - "15673:15672"
 
-rabbit3:
-  #build: clustered-rabbitmq
-  image: clustered-rabbitmq
-  hostname: rabbit3
-  links:
-    - rabbit1
-    - rabbit2
-  environment:
-    - ERLANG_COOKIE=abcdefg
-    - CLUSTER_WITH=rabbit1
-    - ENABLE_RAM=true
-    - RAM_NODE=true
-  ports:
-    - "5675:5672"
-    - "15675:15672"
 
-haproxy:
-  image: haproxy
-  volumes:    
-    - ./haproxy/:/usr/local/etc/haproxy
-  links:
-    - rabbit1
-    - rabbit2
-    - rabbit3
-  ports:
-    - "15672:15672"
-    - "5672:5672"
-    - "8080:8080"
+
+  rabbit2:
+    #build: clustered-rabbitmq
+    image: clustered-rabbitmq
+    hostname: rabbit2
+    environment:
+      - ERLANG_COOKIE=abcdefg
+      - CLUSTER_WITH=rabbit1
+      - ENABLE_RAM=true
+      - RAM_NODE=true
+    ports:
+      - "5674:5672"
+      - "15674:15672"
+
+  rabbit3:
+    #build: clustered-rabbitmq
+    image: clustered-rabbitmq
+    hostname: rabbit3
+    environment:
+      - ERLANG_COOKIE=abcdefg
+      - CLUSTER_WITH=rabbit1
+      - ENABLE_RAM=true
+      - RAM_NODE=true
+    ports:
+      - "5675:5672"
+      - "15675:15672"
+
+
+  haproxy:
+    image: haproxy
+    hostname: haproxy
+    volumes:    
+      - ./haproxy/:/usr/local/etc/haproxy
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "8080:8080"
+
+
+

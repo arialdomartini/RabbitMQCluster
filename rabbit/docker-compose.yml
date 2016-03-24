@@ -5,6 +5,7 @@ services:
     #build: clustered-rabbitmq
     image: clustered-rabbitmq
     hostname: rabbit1
+    container_name: rabbit1
     environment:
       - ERLANG_COOKIE=abcdefg
     ports:
@@ -17,6 +18,7 @@ services:
     #build: clustered-rabbitmq
     image: clustered-rabbitmq
     hostname: rabbit2
+    container_name: rabbit2
     environment:
       - ERLANG_COOKIE=abcdefg
       - CLUSTER_WITH=rabbit1
@@ -30,6 +32,7 @@ services:
     #build: clustered-rabbitmq
     image: clustered-rabbitmq
     hostname: rabbit3
+    container_name: rabbit3
     environment:
       - ERLANG_COOKIE=abcdefg
       - CLUSTER_WITH=rabbit1
@@ -43,12 +46,16 @@ services:
   haproxy:
     image: haproxy
     hostname: haproxy
+    container_name: haproxy
     volumes:    
       - ./haproxy/:/usr/local/etc/haproxy
     ports:
       - "15672:15672"
       - "5672:5672"
       - "8080:8080"
-
+    depends_on:
+      - rabbit1
+      - rabbit2
+      - rabbit3
 
 

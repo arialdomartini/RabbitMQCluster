@@ -6,7 +6,7 @@ namespace Rabbit.Publisher
     {
         private static void Main(string[] args)
         {
-            var hostName = args[0];
+            var hostName = "192.168.99.100"; //args[0];
 
             var publisher = new Publisher();
 

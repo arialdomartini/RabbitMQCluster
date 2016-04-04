@@ -30,14 +30,14 @@ namespace Rabbit.Publisher
         {
             var routingkey = "foo";
             var i = 0;
-            while (++i > 0)
+            while (++i < 12)
             {
                 var published = false;
                 while (!published)
                 {
                     try
                     {
-                        var message = string.Format("Message {0}", i);
+                        var message = string.Format("{0}", i);
 
                         var body = Encoding.UTF8.GetBytes(message);
                         channel.BasicPublish(exchange, routingkey, null, body);
@@ -50,7 +50,7 @@ namespace Rabbit.Publisher
                         Console.WriteLine(" Publishing failed, retrying...");
                         Thread.Sleep(30);
                     }
-                    Thread.Sleep(300);
+                    Thread.Sleep(30);
                 }
             }
         }

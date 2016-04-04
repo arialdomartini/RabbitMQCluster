@@ -21,45 +21,27 @@ namespace ReliableConsumer
             var exchange = "testexchange";
             channel.ExchangeDeclare(exchange, "direct");
 
-            var queueName = channel.QueueDeclare().QueueName;
+            var queueName = "foo";
+            channel.QueueDelete(queueName);
+            channel.QueueDeclare(queue: queueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null);
 
-            channel.ModelShutdown += (sender, eventArgs) =>
-            {
-                Console.WriteLine("  >>>>>>>> Model shutdown!");
-
-            };
-
+            channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
             channel.QueueBind(queueName, exchange, "foo");
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += (model, ea) =>
-            {
-                ConsumeMessage(channel, ea);
-            };
-            channel.BasicConsume(queueName, false, consumer);    
+
+            //var eventingConsumer = new EventingConsumer(channel);
+            //channel.BasicConsume(queueName, false, eventingConsumer);
 
 
+            var basicConsumer = new BasicConsumer(channel, crash: true);
+            channel.BasicConsume(queueName, false, basicConsumer);
+            //basicConsumer.ConsumerTag = tag;
 
             Console.ReadLine();
         }
 
-        static void ConsumeMessage(IModel channel, BasicDeliverEventArgs ea)
-        {
-            try
-            {
-
-                var body = ea.Body;
-                var message = Encoding.UTF8.GetString(body);
-                var routingKey = ea.RoutingKey;
-
-                Console.WriteLine("Reliable consumer: received '{0}':'{1}'", routingKey, message);
-                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-
-            }
-            catch (Exception e)
-            {
-                channel.BasicNack(deliveryTag: ea.DeliveryTag, multiple: false, requeue: true);
-                Console.WriteLine("     Exception in reliable consumer");
-            }
-        }
     }
 }

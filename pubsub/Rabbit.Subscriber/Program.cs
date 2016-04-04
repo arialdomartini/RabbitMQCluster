@@ -43,6 +43,11 @@ namespace ReliableConsumer
             Console.ReadLine();
         }
 
+        public void NotifyDeath(IModel channel)
+        {
+            Subscribe(channel, false);
+        }
+
         public void Subscribe(IModel channel, bool shouldCrash)
         {
             channel.QueueDeclare(queue: _queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);

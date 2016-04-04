@@ -12,15 +12,14 @@ namespace ReliableConsumer
         readonly IModel _channel;
         readonly bool _crash = true;
 
-        MainClass _manager;
+        MainClass _supervisor;
 
-        public BasicConsumer(IModel channel, bool crash, MainClass manager) : base (channel)
+        public BasicConsumer(IModel channel, bool crash, MainClass supervisor) : base (channel)
         {
-            _manager = manager;
+            _supervisor = supervisor;
             _crash = crash;
             _channel = channel;
         }
-
 
         public override void HandleBasicCancel(string consumerTag)
         {
@@ -32,18 +31,16 @@ namespace ReliableConsumer
             base.HandleBasicCancelOk(consumerTag);
             Console.Write("BasicCancelOk. Sleeping...");
             Thread.Sleep(1000);
-            Console.WriteLine("Restarted!");
+            Console.WriteLine("Asking my supervisor to kill me");
 
-            _manager.Subscribe(_channel, shouldCrash: false);
+            _supervisor.NotifyDeath(_channel);
         }
 
         public override void HandleBasicConsumeOk(string consumerTag)
         {
             base.HandleBasicConsumeOk(consumerTag);
             Console.WriteLine("BasicConsumeOk");
-
         }
-
 
         public override void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
         {

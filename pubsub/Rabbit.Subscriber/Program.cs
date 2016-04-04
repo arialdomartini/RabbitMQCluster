@@ -2,15 +2,24 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using RabbitMQ.Util;
 
 namespace ReliableConsumer
 {
-    class MainClass
+    public class MainClass
     {
+        static string _exchange;
+
         public static void Main(string[] args)
         {
             var hostName = args[0];
-         
+
+            new MainClass().Run(hostName);
+        }
+
+        public void Run(string hostName)
+        {
+
             var connectionFactory = new ConnectionFactory {HostName = hostName, AutomaticRecoveryEnabled = true, 
                 NetworkRecoveryInterval = TimeSpan.FromMilliseconds(100)};
 
@@ -18,30 +27,24 @@ namespace ReliableConsumer
 
             var channel = connection.CreateModel();
 
-            var exchange = "testexchange";
-            channel.ExchangeDeclare(exchange, "direct");
-
-            var queueName = "foo";
-            channel.QueueDelete(queueName);
-            channel.QueueDeclare(queue: queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
-
+            _exchange = "testexchange";
+            channel.ExchangeDeclare(_exchange, "direct");
             channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
-            channel.QueueBind(queueName, exchange, "foo");
 
-            //var eventingConsumer = new EventingConsumer(channel);
-            //channel.BasicConsume(queueName, false, eventingConsumer);
+            Subscribe(channel);
 
-
-            var basicConsumer = new BasicConsumer(channel, crash: true);
-            channel.BasicConsume(queueName, false, basicConsumer);
-            //basicConsumer.ConsumerTag = tag;
 
             Console.ReadLine();
         }
 
+        public void Subscribe(IModel channel)
+        {
+            const string queueName = "foo";
+            channel.QueueDelete(queueName);
+            channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            channel.QueueBind(queueName, _exchange, "foo");
+            var basicConsumer = new BasicConsumer(channel, true, this);
+            channel.BasicConsume(queueName, false, basicConsumer);
+        }
     }
 }

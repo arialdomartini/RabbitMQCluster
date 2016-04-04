@@ -12,11 +12,15 @@ namespace ReliableConsumer
         readonly IModel _channel;
         readonly bool _crash = true;
 
-        public BasicConsumer(IModel channel, bool crash) : base (channel)
+        MainClass _manager;
+
+        public BasicConsumer(IModel channel, bool crash, MainClass manager) : base (channel)
         {
+            _manager = manager;
             _crash = crash;
             _channel = channel;
         }
+
 
         public override void HandleBasicCancel(string consumerTag)
         {
@@ -52,17 +56,18 @@ namespace ReliableConsumer
             Thread.Sleep(35000);
             Console.WriteLine("Restarted!");
 
-            var queueName = "foo";
-                        _channel.QueueDeclare(queue: queueName,
-                            durable: true,
-                            exclusive: false,
-                            autoDelete: false,
-                            arguments: null);
-            
-                        _channel.QueueBind(queueName, "testexchange", "foo");
-
-            var basicConsumer = new BasicConsumer(_channel, false);
-            var tag = _channel.BasicConsume(queueName, false, basicConsumer);
+            _manager.Subscribe(_channel);
+//            var queueName = "foo";
+//                        _channel.QueueDeclare(queue: queueName,
+//                            durable: true,
+//                            exclusive: false,
+//                            autoDelete: false,
+//                            arguments: null);
+//            
+//                        _channel.QueueBind(queueName, "testexchange", "foo");
+//
+//            var basicConsumer = new BasicConsumer(_channel, false);
+//            var tag = _channel.BasicConsume(queueName, false, basicConsumer);
 
         }
 

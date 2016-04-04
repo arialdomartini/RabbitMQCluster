@@ -10,6 +10,8 @@ namespace ReliableConsumer
     {
         static string _exchange;
 
+        string _queueName;
+
         public static void Main(string[] args)
         {
             var hostName = args[0];
@@ -29,22 +31,24 @@ namespace ReliableConsumer
 
             _exchange = "testexchange";
             channel.ExchangeDeclare(_exchange, "direct");
+
+            _queueName = "foo";
+            channel.QueueDelete(_queueName);
+
             channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
-            Subscribe(channel);
+            Subscribe(channel, shouldCrash: true);
 
 
             Console.ReadLine();
         }
 
-        public void Subscribe(IModel channel)
+        public void Subscribe(IModel channel, bool shouldCrash)
         {
-            const string queueName = "foo";
-            channel.QueueDelete(queueName);
-            channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
-            channel.QueueBind(queueName, _exchange, "foo");
-            var basicConsumer = new BasicConsumer(channel, true, this);
-            channel.BasicConsume(queueName, false, basicConsumer);
+            channel.QueueDeclare(queue: _queueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            channel.QueueBind(_queueName, _exchange, "foo");
+            var basicConsumer = new BasicConsumer(channel, shouldCrash, this);
+            channel.BasicConsume(_queueName, false, basicConsumer);
         }
     }
 }

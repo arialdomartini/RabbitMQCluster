@@ -27,48 +27,14 @@ namespace ReliableConsumer
             Console.WriteLine("HandleBasicCancel");
         }
 
-        public override void OnCancel()
-        {
-//            _channel.BasicNack(deliveryTag, false, true);
-//
-//            Console.WriteLine("OnCancel. Waiting keypress..."); //Console.ReadLine();
-//            //base.OnCancel();
-//            Console.WriteLine("Awaking! Waiting keypress..."); Console.ReadLine();
-//
-//            var queueName = "foo";
-//            _channel.QueueDeclare(queue: queueName,
-//                durable: true,
-//                exclusive: false,
-//                autoDelete: false,
-//                arguments: null);
-//
-//            _channel.QueueBind(queueName, "testexchange", "foo");
-//
-//            var basicConsumer = new BasicConsumer(_channel);
-//            var tag = _channel.BasicConsume(queueName, false, basicConsumer);
-        }
-
-
         public override void HandleBasicCancelOk(string consumerTag)
         {
             base.HandleBasicCancelOk(consumerTag);
             Console.Write("BasicCancelOk. Sleeping...");
-            Thread.Sleep(35000);
+            Thread.Sleep(1000);
             Console.WriteLine("Restarted!");
 
-            _manager.Subscribe(_channel);
-//            var queueName = "foo";
-//                        _channel.QueueDeclare(queue: queueName,
-//                            durable: true,
-//                            exclusive: false,
-//                            autoDelete: false,
-//                            arguments: null);
-//            
-//                        _channel.QueueBind(queueName, "testexchange", "foo");
-//
-//            var basicConsumer = new BasicConsumer(_channel, false);
-//            var tag = _channel.BasicConsume(queueName, false, basicConsumer);
-
+            _manager.Subscribe(_channel, shouldCrash: false);
         }
 
         public override void HandleBasicConsumeOk(string consumerTag)
@@ -77,7 +43,7 @@ namespace ReliableConsumer
             Console.WriteLine("BasicConsumeOk");
 
         }
-            
+
 
         public override void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, IBasicProperties properties, byte[] body)
         {
@@ -87,11 +53,7 @@ namespace ReliableConsumer
                 Console.WriteLine("BasicConsumer: received '{0}':'{1}'", routingKey, message);
                 if(_crash == true && int.Parse(message) % 10 == 0)
                 {
-                    Console.WriteLine("  Crashing");
-                    _channel.BasicCancel(ConsumerTag);
-                    _channel.BasicReject(deliveryTag, true);
-
-                    return;
+                    throw new Exception("An unhandled exception");
                 }
                 _channel.BasicAck(deliveryTag, false);
                     
@@ -99,7 +61,10 @@ namespace ReliableConsumer
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
+                _channel.BasicCancel(ConsumerTag);
+                _channel.BasicReject(deliveryTag, true);
 
+                return;
             }
         }
 	}

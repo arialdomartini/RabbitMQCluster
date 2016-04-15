@@ -6,7 +6,7 @@ using RabbitMQ.Util;
 
 namespace ReliableConsumer
 {
-    public class MainClass
+    public class MainClass : IObserver
     {
         static string _exchange;
 

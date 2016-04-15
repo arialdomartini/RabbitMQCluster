@@ -12,9 +12,9 @@ namespace ReliableConsumer
         readonly IModel _channel;
         readonly bool _crash = true;
 
-        MainClass _supervisor;
+        IObserver _supervisor;
 
-        public BasicConsumer(IModel channel, bool crash, MainClass supervisor) : base (channel)
+        public BasicConsumer(IModel channel, bool crash, IObserver supervisor) : base (channel)
         {
             _supervisor = supervisor;
             _crash = crash;
